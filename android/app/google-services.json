@@ -1,0 +1,78 @@
+{
+  "project_info": {
+    "project_number": "1068555216713",
+    "project_id": "th5-student-manager",
+    "storage_bucket": "th5-student-manager.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1068555216713:android:e2951426dbbc42c18f9c98",
+        "android_client_info": {
+          "package_name": "com.example.th5studentmanagerapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1068555216713-0kjh8kgb3ql9nkitjjvp5ft01s0v8cag.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.th5studentmanagerapp",
+            "certificate_hash": "a53d4e26a87900921dcfa84e5f2bfe858c8c158b"
+          }
+        },
+        {
+          "client_id": "1068555216713-98ttephtfdjaq6drjakoo85tgjkkll6f.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.th5studentmanagerapp",
+            "certificate_hash": "e2aae375b92a97d4acae04a19d274aa49b20a237"
+          }
+        },
+        {
+          "client_id": "1068555216713-eufghv3d430av436pfsh0ho9p7glk8ds.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.th5studentmanagerapp",
+            "certificate_hash": "1cd3a18c88ee16617c18c9d43e03a1b010e3054f"
+          }
+        },
+        {
+          "client_id": "1068555216713-u97jog4o98hvqdpi1i9os1ebqthvh32e.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.th5studentmanagerapp",
+            "certificate_hash": "41cedc453df0af858a8a9ab8b0ef07630abf3287"
+          }
+        },
+        {
+          "client_id": "1068555216713-mgt8p5ln8pkoma2aib9gd7jkekaa8ldm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD272Vs24rhDS0tf8IQThxpbS6K0qylfdU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1068555216713-mgt8p5ln8pkoma2aib9gd7jkekaa8ldm.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1068555216713-1ml3igttesk67ctbep69vq7es54l0eaf.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.th5travelapp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
