@@ -122,9 +122,15 @@ class StudentCard extends StatelessWidget {
     if (level == 'Xuất sắc') {
       return Colors.blue;
     }
+    if (level == 'Giỏi') {
+      return Colors.indigo;
+    }
     if (level == 'Khá') {
       return Colors.green;
     }
-    return Colors.orange;
+    if (level == 'Trung bình') {
+      return Colors.orange;
+    }
+    return Colors.red;
   }
 }

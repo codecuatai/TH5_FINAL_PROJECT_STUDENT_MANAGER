@@ -5,23 +5,104 @@ import 'package:provider/provider.dart';
 import '../models/student_model.dart';
 import '../providers/student_provider.dart';
 import '../utils/app_constants.dart';
+import '../utils/gpa_utils.dart';
 import '../widgets/error_state.dart';
 import '../widgets/loading_state.dart';
 
-class AnalyticsScreen extends StatelessWidget {
+class AnalyticsScreen extends StatefulWidget {
   const AnalyticsScreen({super.key});
 
   static const String routeName = '/analytics';
 
   @override
-  Widget build(BuildContext context) {
-    final StudentProvider provider = context.watch<StudentProvider>();
+  State<AnalyticsScreen> createState() => _AnalyticsScreenState();
+}
 
+class _AnalyticsScreenState extends State<AnalyticsScreen> {
+  String? _facultyFilter;
+  String? _courseFilter;
+  String _academicFilter = AppConstants.filterAll;
+
+  late final Stream<List<StudentModel>> _studentsStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _studentsStream = context.read<StudentProvider>().studentsStream;
+  }
+
+  void _setFacultyFilter(String? faculty) {
+    setState(() {
+      _facultyFilter = _normalizeFilterValue(faculty);
+    });
+  }
+
+  void _setCourseFilter(String? course) {
+    setState(() {
+      _courseFilter = _normalizeFilterValue(course);
+    });
+  }
+
+  void _setAcademicFilter(String level) {
+    setState(() {
+      _academicFilter = level;
+    });
+  }
+
+  void _clearFilters() {
+    setState(() {
+      _facultyFilter = null;
+      _courseFilter = null;
+      _academicFilter = AppConstants.filterAll;
+    });
+  }
+
+  List<StudentModel> _applyAdvancedFilters(List<StudentModel> students) {
+    return students.where((StudentModel student) {
+      final bool matchesFaculty =
+          _facultyFilter == null || student.faculty == _facultyFilter;
+      final bool matchesCourse =
+          _courseFilter == null || student.course == _courseFilter;
+
+      final String studentAcademicLevel = GpaUtils.academicLevelFromGpa4(
+        student.gpa4,
+      );
+      final bool matchesAcademic =
+          _academicFilter == AppConstants.filterAll ||
+          studentAcademicLevel == _academicFilter;
+
+      return matchesFaculty && matchesCourse && matchesAcademic;
+    }).toList();
+  }
+
+  List<StudentModel> _currentMonthBirthdays(List<StudentModel> students) {
+    final DateTime now = DateTime.now();
+    return students
+        .where((StudentModel student) => student.birthDate.month == now.month)
+        .toList();
+  }
+
+  List<StudentModel> _unpaidTuitionStudents(List<StudentModel> students) {
+    return students
+        .where((StudentModel student) => student.hasUnpaidTuition)
+        .toList();
+  }
+
+  String? _normalizeFilterValue(String? value) {
+    if (value == null || value == AppConstants.filterAll) {
+      return null;
+    }
+
+    return value;
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF3F7FC),
       appBar: AppBar(title: const Text(AppConstants.appTitle)),
       body: StreamBuilder<List<StudentModel>>(
-        stream: context.read<StudentProvider>().studentsStream,
+        stream: _studentsStream,
         builder:
             (BuildContext context, AsyncSnapshot<List<StudentModel>> snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -34,16 +115,18 @@ class AnalyticsScreen extends StatelessWidget {
 
               final List<StudentModel> students =
                   snapshot.data ?? <StudentModel>[];
-              provider.setStudentsFromSnapshot(students);
 
-              final List<StudentModel> filteredStudents =
-                  provider.filteredStudents;
-              final List<StudentModel> birthdays =
-                  provider.currentMonthBirthdays;
-              final List<StudentModel> unpaidTuition =
-                  provider.unpaidTuitionStudents;
+              final List<StudentModel> filteredStudents = _applyAdvancedFilters(
+                students,
+              );
+              final List<StudentModel> birthdays = _currentMonthBirthdays(
+                students,
+              );
+              final List<StudentModel> unpaidTuition = _unpaidTuitionStudents(
+                students,
+              );
               final Map<String, int> academicDistribution =
-                  provider.academicDistribution;
+                  GpaUtils.academicDistribution(filteredStudents);
 
               return SafeArea(
                 child: SingleChildScrollView(
@@ -60,7 +143,15 @@ class AnalyticsScreen extends StatelessWidget {
                                 ?.copyWith(fontWeight: FontWeight.w700),
                           ),
                           const SizedBox(height: 12),
-                          _FilterPanel(provider: provider),
+                          _FilterPanel(
+                            facultyFilter: _facultyFilter,
+                            courseFilter: _courseFilter,
+                            academicFilter: _academicFilter,
+                            onFacultyChanged: _setFacultyFilter,
+                            onCourseChanged: _setCourseFilter,
+                            onAcademicChanged: _setAcademicFilter,
+                            onClearFilters: _clearFilters,
+                          ),
                           const SizedBox(height: 12),
                           Wrap(
                             spacing: 10,
@@ -118,9 +209,23 @@ class AnalyticsScreen extends StatelessWidget {
 }
 
 class _FilterPanel extends StatelessWidget {
-  const _FilterPanel({required this.provider});
+  const _FilterPanel({
+    required this.facultyFilter,
+    required this.courseFilter,
+    required this.academicFilter,
+    required this.onFacultyChanged,
+    required this.onCourseChanged,
+    required this.onAcademicChanged,
+    required this.onClearFilters,
+  });
 
-  final StudentProvider provider;
+  final String? facultyFilter;
+  final String? courseFilter;
+  final String academicFilter;
+  final ValueChanged<String?> onFacultyChanged;
+  final ValueChanged<String?> onCourseChanged;
+  final ValueChanged<String> onAcademicChanged;
+  final VoidCallback onClearFilters;
 
   @override
   Widget build(BuildContext context) {
@@ -136,8 +241,7 @@ class _FilterPanel extends StatelessWidget {
             children: <Widget>[
               Expanded(
                 child: DropdownButtonFormField<String>(
-                  initialValue:
-                      provider.facultyFilter ?? AppConstants.filterAll,
+                  initialValue: facultyFilter ?? AppConstants.filterAll,
                   decoration: const InputDecoration(
                     labelText: 'Khoa',
                     border: OutlineInputBorder(),
@@ -155,13 +259,13 @@ class _FilterPanel extends StatelessWidget {
                             ),
                           )
                           .toList(),
-                  onChanged: provider.setFacultyFilter,
+                  onChanged: onFacultyChanged,
                 ),
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: DropdownButtonFormField<String>(
-                  initialValue: provider.courseFilter ?? AppConstants.filterAll,
+                  initialValue: courseFilter ?? AppConstants.filterAll,
                   decoration: const InputDecoration(
                     labelText: 'Khóa',
                     border: OutlineInputBorder(),
@@ -176,7 +280,7 @@ class _FilterPanel extends StatelessWidget {
                             ),
                           )
                           .toList(),
-                  onChanged: provider.setCourseFilter,
+                  onChanged: onCourseChanged,
                 ),
               ),
             ],
@@ -186,7 +290,7 @@ class _FilterPanel extends StatelessWidget {
             children: <Widget>[
               Expanded(
                 child: DropdownButtonFormField<String>(
-                  initialValue: provider.academicFilter,
+                  initialValue: academicFilter,
                   decoration: const InputDecoration(
                     labelText: 'Học lực',
                     border: OutlineInputBorder(),
@@ -204,14 +308,14 @@ class _FilterPanel extends StatelessWidget {
                     if (value == null) {
                       return;
                     }
-                    provider.setAcademicFilter(value);
+                    onAcademicChanged(value);
                   },
                 ),
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: provider.clearFilters,
+                  onPressed: onClearFilters,
                   icon: const Icon(Icons.filter_alt_off),
                   label: const Text('Xóa bộ lọc'),
                 ),
@@ -310,9 +414,13 @@ class _AcademicDistributionCard extends StatelessWidget {
                     avatar: CircleAvatar(
                       backgroundColor: entry.key == 'Xuất sắc'
                           ? Colors.blue
+                          : entry.key == 'Giỏi'
+                          ? Colors.indigo
                           : entry.key == 'Khá'
                           ? Colors.green
-                          : Colors.orange,
+                          : entry.key == 'Trung bình'
+                          ? Colors.orange
+                          : Colors.red,
                     ),
                   ),
                 )

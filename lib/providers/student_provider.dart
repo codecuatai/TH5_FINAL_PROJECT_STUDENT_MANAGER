@@ -18,6 +18,7 @@ class StudentProvider extends ChangeNotifier {
   String? _facultyFilter;
   String? _courseFilter;
   String _academicFilter = AppConstants.filterAll;
+  double _minGpaFilter = 0.0;
 
   String? _selectedStudentId;
   bool _isSaving = false;
@@ -35,6 +36,7 @@ class StudentProvider extends ChangeNotifier {
   String? get facultyFilter => _facultyFilter;
   String? get courseFilter => _courseFilter;
   String get academicFilter => _academicFilter;
+  double get minGpaFilter => _minGpaFilter;
 
   String? get selectedStudentId => _selectedStudentId;
 
@@ -80,10 +82,16 @@ class StudentProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setMinGpaFilter(double value) {
+    _minGpaFilter = value.clamp(0.0, 4.0).toDouble();
+    notifyListeners();
+  }
+
   void clearFilters() {
     _facultyFilter = null;
     _courseFilter = null;
     _academicFilter = AppConstants.filterAll;
+    _minGpaFilter = 0.0;
     _searchQuery = '';
     notifyListeners();
   }
@@ -109,6 +117,7 @@ class StudentProvider extends ChangeNotifier {
           _facultyFilter == null || student.faculty == _facultyFilter;
       final bool matchesCourse =
           _courseFilter == null || student.course == _courseFilter;
+      final bool matchesGpa = student.gpa4 >= _minGpaFilter;
 
       final String studentAcademicLevel = GpaUtils.academicLevelFromGpa4(
         student.gpa4,
@@ -120,17 +129,19 @@ class StudentProvider extends ChangeNotifier {
       return matchesSearch &&
           matchesFaculty &&
           matchesCourse &&
+          matchesGpa &&
           matchesAcademic;
     }).toList();
   }
 
   int get totalStudents => _students.length;
 
-  int get scholarshipStudents =>
-      _students.where((StudentModel s) => s.gpa4 >= 3.2).length;
+  int get scholarshipStudents => _students
+      .where((StudentModel s) => GpaUtils.isScholarshipGpa(s.gpa4))
+      .length;
 
   int get warningStudents =>
-      _students.where((StudentModel s) => s.gpa4 < 2.0).length;
+      _students.where((StudentModel s) => GpaUtils.isWarningGpa(s.gpa4)).length;
 
   List<StudentModel> get currentMonthBirthdays {
     final DateTime now = DateTime.now();

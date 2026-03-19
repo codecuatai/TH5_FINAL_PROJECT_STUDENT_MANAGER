@@ -16,6 +16,7 @@ import '../widgets/student_card.dart';
 import 'analytics_screen.dart';
 import 'login_screen.dart';
 import 'student_detail_screen.dart';
+import 'student_group_screen.dart';
 import 'student_upsert_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -88,6 +89,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void _handleCourseFilterChange(StudentProvider provider, String? value) {
     _startFilterLoading('Đang lọc theo khóa...');
     provider.setCourseFilter(value);
+  }
+
+  void _handleGpaFilterChange(StudentProvider provider, double value) {
+    _startFilterLoading('Đang lọc theo GPA...');
+    provider.setMinGpaFilter(value);
+  }
+
+  Future<void> _openScholarshipStudents() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) =>
+            const StudentGroupScreen(groupType: StudentGroupType.scholarship),
+      ),
+    );
+  }
+
+  Future<void> _openWarningStudents() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) =>
+            const StudentGroupScreen(groupType: StudentGroupType.warning),
+      ),
+    );
   }
 
   Future<void> _logout() async {
@@ -293,38 +317,58 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         horizontal: 16,
                         vertical: 8,
                       ),
-                      child: _StatsSection(provider: provider),
+                      child: _StatsSection(
+                        provider: provider,
+                        onScholarshipTap: _openScholarshipStudents,
+                        onWarningTap: _openWarningStudents,
+                      ),
                     ),
                   ),
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(16, 8, 16, 10),
-                      child: Row(
+                      child: Column(
                         children: <Widget>[
-                          Expanded(
-                            child: _FilterDropdown(
-                              title: 'Khoa',
-                              value: provider.facultyFilter,
-                              items: <String>[
-                                AppConstants.filterAll,
-                                ...AppConstants.faculties,
-                              ],
-                              onChanged: (String? value) =>
-                                  _handleFacultyFilterChange(provider, value),
-                            ),
+                          Row(
+                            children: <Widget>[
+                              Expanded(
+                                child: _FilterDropdown(
+                                  title: 'Khoa',
+                                  value: provider.facultyFilter,
+                                  items: <String>[
+                                    AppConstants.filterAll,
+                                    ...AppConstants.faculties,
+                                  ],
+                                  onChanged: (String? value) =>
+                                      _handleFacultyFilterChange(
+                                        provider,
+                                        value,
+                                      ),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: _FilterDropdown(
+                                  title: 'Khóa',
+                                  value: provider.courseFilter,
+                                  items: <String>[
+                                    AppConstants.filterAll,
+                                    ...AppConstants.courses,
+                                  ],
+                                  onChanged: (String? value) =>
+                                      _handleCourseFilterChange(
+                                        provider,
+                                        value,
+                                      ),
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: _FilterDropdown(
-                              title: 'Khóa',
-                              value: provider.courseFilter,
-                              items: <String>[
-                                AppConstants.filterAll,
-                                ...AppConstants.courses,
-                              ],
-                              onChanged: (String? value) =>
-                                  _handleCourseFilterChange(provider, value),
-                            ),
+                          const SizedBox(height: 12),
+                          _GpaFilterSlider(
+                            value: provider.minGpaFilter,
+                            onChanged: (double value) =>
+                                _handleGpaFilterChange(provider, value),
                           ),
                         ],
                       ),
@@ -372,9 +416,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
 }
 
 class _StatsSection extends StatelessWidget {
-  const _StatsSection({required this.provider});
+  const _StatsSection({
+    required this.provider,
+    required this.onScholarshipTap,
+    required this.onWarningTap,
+  });
 
   final StudentProvider provider;
+  final VoidCallback onScholarshipTap;
+  final VoidCallback onWarningTap;
 
   @override
   Widget build(BuildContext context) {
@@ -396,6 +446,7 @@ class _StatsSection extends StatelessWidget {
                 value: provider.scholarshipStudents.toString(),
                 icon: Icons.emoji_events,
                 color: Colors.green,
+                onTap: onScholarshipTap,
               ),
               const SizedBox(height: 10),
               StatsCard(
@@ -403,6 +454,7 @@ class _StatsSection extends StatelessWidget {
                 value: provider.warningStudents.toString(),
                 icon: Icons.warning_amber,
                 color: Colors.orange,
+                onTap: onWarningTap,
               ),
             ],
           );
@@ -425,6 +477,7 @@ class _StatsSection extends StatelessWidget {
                 value: provider.scholarshipStudents.toString(),
                 icon: Icons.emoji_events,
                 color: Colors.green,
+                onTap: onScholarshipTap,
               ),
             ),
             const SizedBox(width: 10),
@@ -434,6 +487,7 @@ class _StatsSection extends StatelessWidget {
                 value: provider.warningStudents.toString(),
                 icon: Icons.warning_amber,
                 color: Colors.orange,
+                onTap: onWarningTap,
               ),
             ),
           ],
@@ -478,6 +532,44 @@ class _FilterDropdown extends StatelessWidget {
           )
           .toList(),
       onChanged: onChanged,
+    );
+  }
+}
+
+class _GpaFilterSlider extends StatelessWidget {
+  const _GpaFilterSlider({required this.value, required this.onChanged});
+
+  final double value;
+  final ValueChanged<double> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 6),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            'Lọc GPA tối thiểu: ${value.toStringAsFixed(2)}',
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+          ),
+          Slider(
+            value: value,
+            min: 0.0,
+            max: 4.0,
+            divisions: 40,
+            label: value.toStringAsFixed(2),
+            onChanged: onChanged,
+          ),
+        ],
+      ),
     );
   }
 }

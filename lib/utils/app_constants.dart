@@ -17,8 +17,10 @@ class AppConstants {
   static const List<String> academicLevels = <String>[
     filterAll,
     'Xuất sắc',
+    'Giỏi',
     'Khá',
     'Trung bình',
+    'Yếu',
   ];
 
   static const List<String> genders = <String>['male', 'female', 'other'];

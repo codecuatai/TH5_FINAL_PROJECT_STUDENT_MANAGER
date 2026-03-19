@@ -323,9 +323,13 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> {
                               value: academicLevel,
                               color: academicLevel == 'Xuất sắc'
                                   ? Colors.blue
+                                  : academicLevel == 'Giỏi'
+                                  ? Colors.indigo
                                   : academicLevel == 'Khá'
                                   ? Colors.green
-                                  : Colors.orange,
+                                  : academicLevel == 'Trung bình'
+                                  ? Colors.orange
+                                  : Colors.red,
                             ),
                           ],
                         ),

@@ -51,13 +51,28 @@ class GpaUtils {
   }
 
   static String academicLevelFromGpa4(double gpa4) {
-    if (gpa4 >= 3.6) {
+    if (gpa4 > 3.6) {
       return 'Xuất sắc';
+    }
+    if (gpa4 >= 3.2) {
+      return 'Giỏi';
     }
     if (gpa4 >= 2.5) {
       return 'Khá';
     }
-    return 'Trung bình';
+    if (gpa4 >= 1.0) {
+      return 'Trung bình';
+    }
+
+    return 'Yếu';
+  }
+
+  static bool isScholarshipGpa(double gpa4) {
+    return gpa4 >= 3.2;
+  }
+
+  static bool isWarningGpa(double gpa4) {
+    return gpa4 < 1.0;
   }
 
   static Map<String, int> gradeDistribution(List<SubjectModel> subjects) {
@@ -109,8 +124,10 @@ class GpaUtils {
   static Map<String, int> academicDistribution(List<StudentModel> students) {
     final Map<String, int> result = <String, int>{
       'Xuất sắc': 0,
+      'Giỏi': 0,
       'Khá': 0,
       'Trung bình': 0,
+      'Yếu': 0,
     };
 
     for (final StudentModel student in students) {
