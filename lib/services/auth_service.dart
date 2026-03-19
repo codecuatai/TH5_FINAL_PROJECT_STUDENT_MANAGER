@@ -19,7 +19,7 @@ class AuthService {
     } on FirebaseAuthException catch (error) {
       throw Exception(_mapAuthError(error));
     } catch (error) {
-      throw Exception('Login failed: $error');
+      throw Exception('Đăng nhập thất bại: $error');
     }
   }
 
@@ -29,26 +29,26 @@ class AuthService {
     } on FirebaseAuthException catch (error) {
       throw Exception(_mapAuthError(error));
     } catch (error) {
-      throw Exception('Logout failed: $error');
+      throw Exception('Đăng xuất thất bại: $error');
     }
   }
 
   String _mapAuthError(FirebaseAuthException error) {
     switch (error.code) {
       case 'invalid-email':
-        return 'The email address is invalid.';
+        return 'Địa chỉ email không hợp lệ.';
       case 'invalid-credential':
-        return 'Email or password is incorrect.';
+        return 'Email hoặc mật khẩu không đúng.';
       case 'user-disabled':
-        return 'This account has been disabled.';
+        return 'Tài khoản này đã bị vô hiệu hóa.';
       case 'user-not-found':
-        return 'No user found for this email.';
+        return 'Không tìm thấy tài khoản với email này.';
       case 'wrong-password':
-        return 'Email or password is incorrect.';
+        return 'Email hoặc mật khẩu không đúng.';
       case 'too-many-requests':
-        return 'Too many requests. Please try again later.';
+        return 'Có quá nhiều yêu cầu. Vui lòng thử lại sau.';
       default:
-        return error.message ?? 'Authentication failed.';
+        return error.message ?? 'Xác thực thất bại.';
     }
   }
 }

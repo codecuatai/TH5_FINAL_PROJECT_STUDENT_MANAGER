@@ -49,7 +49,8 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    final String errorMessage = authProvider.errorMessage ?? 'Login failed.';
+    final String errorMessage =
+        authProvider.errorMessage ?? 'Đăng nhập thất bại.';
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(errorMessage)));
@@ -98,7 +99,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         const SizedBox(height: 18),
                         Text(
-                          'Admin Login',
+                          'Đăng nhập quản trị',
                           style: Theme.of(context).textTheme.headlineSmall
                               ?.copyWith(fontWeight: FontWeight.w700),
                         ),
@@ -121,7 +122,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           textInputAction: TextInputAction.done,
                           onFieldSubmitted: (_) => _handleLogin(),
                           decoration: InputDecoration(
-                            labelText: 'Password',
+                            labelText: 'Mật khẩu',
                             border: const OutlineInputBorder(),
                             prefixIcon: const Icon(Icons.lock_outline),
                             suffixIcon: IconButton(
@@ -153,7 +154,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       strokeWidth: 2,
                                     ),
                                   )
-                                : const Text('Login'),
+                                : const Text('Đăng nhập'),
                           ),
                         ),
                       ],

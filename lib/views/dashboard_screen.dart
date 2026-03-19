@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -7,6 +9,7 @@ import '../providers/auth_provider.dart';
 import '../providers/student_provider.dart';
 import '../utils/app_constants.dart';
 import '../widgets/error_state.dart';
+import '../widgets/filter_loading_overlay.dart';
 import '../widgets/loading_state.dart';
 import '../widgets/stats_card.dart';
 import '../widgets/student_card.dart';
@@ -26,11 +29,65 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   final TextEditingController _searchController = TextEditingController();
+  Timer? _searchDebounceTimer;
+  Timer? _filterLoadingTimer;
+
+  bool _isFiltering = false;
+  String _filterLoadingMessage = 'Đang áp dụng bộ lọc...';
 
   @override
   void dispose() {
+    _searchDebounceTimer?.cancel();
+    _filterLoadingTimer?.cancel();
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _startFilterLoading(String message) {
+    _filterLoadingTimer?.cancel();
+
+    if (!_isFiltering || _filterLoadingMessage != message) {
+      setState(() {
+        _isFiltering = true;
+        _filterLoadingMessage = message;
+      });
+    }
+
+    _filterLoadingTimer = Timer(const Duration(milliseconds: 260), () {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _isFiltering = false;
+      });
+    });
+  }
+
+  void _handleSearchChanged(StudentProvider provider, String value) {
+    _searchDebounceTimer?.cancel();
+    _startFilterLoading('Đang tìm kiếm sinh viên...');
+
+    _searchDebounceTimer = Timer(const Duration(milliseconds: 220), () {
+      provider.setSearchQuery(value);
+    });
+  }
+
+  void _clearSearch(StudentProvider provider) {
+    _searchDebounceTimer?.cancel();
+    _searchController.clear();
+    _startFilterLoading('Đang tải lại danh sách...');
+    provider.setSearchQuery('');
+  }
+
+  void _handleFacultyFilterChange(StudentProvider provider, String? value) {
+    _startFilterLoading('Đang lọc theo khoa...');
+    provider.setFacultyFilter(value);
+  }
+
+  void _handleCourseFilterChange(StudentProvider provider, String? value) {
+    _startFilterLoading('Đang lọc theo khóa...');
+    provider.setCourseFilter(value);
   }
 
   Future<void> _logout() async {
@@ -46,9 +103,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Future<void> _openCall(String phone) async {
     if (phone.trim().isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('No phone number found.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Không tìm thấy số điện thoại.')),
+      );
       return;
     }
 
@@ -57,13 +114,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
       final bool launched = await launchUrl(uri);
       if (!launched && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not start phone call.')),
+          const SnackBar(content: Text('Không thể thực hiện cuộc gọi.')),
         );
       }
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not start phone call.')),
+          const SnackBar(content: Text('Không thể thực hiện cuộc gọi.')),
         );
       }
     }
@@ -74,19 +131,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Delete Student'),
-          content: Text('Delete ${student.name} (${student.mssv})?'),
+          title: const Text('Xóa sinh viên'),
+          content: Text(
+            'Bạn có chắc muốn xóa ${student.name} (${student.mssv})?',
+          ),
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel'),
+              child: const Text('Hủy'),
             ),
             FilledButton(
               onPressed: () => Navigator.of(context).pop(true),
               style: FilledButton.styleFrom(
                 backgroundColor: Colors.red.shade700,
               ),
-              child: const Text('Delete'),
+              child: const Text('Xóa'),
             ),
           ],
         );
@@ -106,7 +165,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(error ?? 'Student deleted successfully.'),
+        content: Text(error ?? 'Đã xóa sinh viên thành công.'),
         backgroundColor: error == null ? Colors.green : Colors.red,
       ),
     );
@@ -124,22 +183,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Navigator.of(context).pushNamed(StudentUpsertScreen.routeName);
         },
         icon: const Icon(Icons.person_add_alt_1),
-        label: const Text('Add Student'),
+        label: const Text('Thêm sinh viên'),
       ),
       body: StreamBuilder<List<StudentModel>>(
         stream: context.read<StudentProvider>().studentsStream,
         builder:
             (BuildContext context, AsyncSnapshot<List<StudentModel>> snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const LoadingState(message: 'Loading students...');
+              final List<StudentModel> students =
+                  snapshot.data ?? provider.students;
+
+              if (snapshot.connectionState == ConnectionState.waiting &&
+                  students.isEmpty) {
+                return const LoadingState(
+                  message: 'Đang tải danh sách sinh viên...',
+                );
               }
 
               if (snapshot.hasError) {
                 return ErrorState(message: snapshot.error.toString());
               }
 
-              final List<StudentModel> students =
-                  snapshot.data ?? <StudentModel>[];
               provider.setStudentsFromSnapshot(students);
               final List<StudentModel> filteredStudents =
                   provider.filteredStudents;
@@ -158,12 +221,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           context,
                         ).pushNamed(AnalyticsScreen.routeName),
                         icon: const Icon(Icons.analytics_outlined),
-                        tooltip: 'Analytics',
+                        tooltip: 'Thống kê',
                       ),
                       IconButton(
                         onPressed: _logout,
                         icon: const Icon(Icons.logout),
-                        tooltip: 'Logout',
+                        tooltip: 'Đăng xuất',
                       ),
                     ],
                     flexibleSpace: FlexibleSpaceBar(
@@ -171,7 +234,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         padding: const EdgeInsets.fromLTRB(16, 72, 16, 12),
                         alignment: Alignment.bottomLeft,
                         child: Text(
-                          'Realtime Student Admin Dashboard',
+                          'Bảng điều khiển quản lý sinh viên theo thời gian thực',
                           style: TextStyle(
                             color: Colors.white.withValues(alpha: 0.9),
                             fontSize: 14,
@@ -186,32 +249,40 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       child: Container(
                         color: const Color(0xFFF3F7FC),
                         padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
-                        child: TextField(
-                          controller: _searchController,
-                          onChanged: (String value) {
-                            provider.setSearchQuery(value);
-                            setState(() {});
-                          },
-                          decoration: InputDecoration(
-                            hintText: 'Search by name or MSSV',
-                            prefixIcon: const Icon(Icons.search),
-                            suffixIcon: _searchController.text.isEmpty
-                                ? null
-                                : IconButton(
-                                    onPressed: () {
-                                      _searchController.clear();
-                                      provider.setSearchQuery('');
-                                      setState(() {});
-                                    },
-                                    icon: const Icon(Icons.clear),
+                        child: ValueListenableBuilder<TextEditingValue>(
+                          valueListenable: _searchController,
+                          builder:
+                              (
+                                BuildContext context,
+                                TextEditingValue value,
+                                Widget? child,
+                              ) {
+                                return TextField(
+                                  controller: _searchController,
+                                  onChanged: (String inputValue) =>
+                                      _handleSearchChanged(
+                                        provider,
+                                        inputValue,
+                                      ),
+                                  decoration: InputDecoration(
+                                    hintText: 'Tìm theo tên hoặc MSSV',
+                                    prefixIcon: const Icon(Icons.search),
+                                    suffixIcon: value.text.isEmpty
+                                        ? null
+                                        : IconButton(
+                                            onPressed: () =>
+                                                _clearSearch(provider),
+                                            icon: const Icon(Icons.clear),
+                                          ),
+                                    filled: true,
+                                    fillColor: Colors.white,
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide.none,
+                                    ),
                                   ),
-                            filled: true,
-                            fillColor: Colors.white,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide.none,
-                            ),
-                          ),
+                                );
+                              },
                         ),
                       ),
                     ),
@@ -232,29 +303,46 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         children: <Widget>[
                           Expanded(
                             child: _FilterDropdown(
-                              title: 'Faculty',
+                              title: 'Khoa',
                               value: provider.facultyFilter,
-                              items: <String>['All', ...AppConstants.faculties],
-                              onChanged: provider.setFacultyFilter,
+                              items: <String>[
+                                AppConstants.filterAll,
+                                ...AppConstants.faculties,
+                              ],
+                              onChanged: (String? value) =>
+                                  _handleFacultyFilterChange(provider, value),
                             ),
                           ),
                           const SizedBox(width: 10),
                           Expanded(
                             child: _FilterDropdown(
-                              title: 'Course',
+                              title: 'Khóa',
                               value: provider.courseFilter,
-                              items: <String>['All', ...AppConstants.courses],
-                              onChanged: provider.setCourseFilter,
+                              items: <String>[
+                                AppConstants.filterAll,
+                                ...AppConstants.courses,
+                              ],
+                              onChanged: (String? value) =>
+                                  _handleCourseFilterChange(provider, value),
                             ),
                           ),
                         ],
                       ),
                     ),
                   ),
-                  if (filteredStudents.isEmpty)
+                  if (_isFiltering)
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+                        child: FilterLoadingOverlay(
+                          message: _filterLoadingMessage,
+                        ),
+                      ),
+                    )
+                  else if (filteredStudents.isEmpty)
                     const SliverFillRemaining(
                       hasScrollBody: false,
-                      child: Center(child: Text('No students found.')),
+                      child: Center(child: Text('Không tìm thấy sinh viên.')),
                     )
                   else
                     SliverList.builder(
@@ -297,21 +385,21 @@ class _StatsSection extends StatelessWidget {
           return Column(
             children: <Widget>[
               StatsCard(
-                title: 'Total students',
+                title: 'Tổng sinh viên',
                 value: provider.totalStudents.toString(),
                 icon: Icons.groups,
                 color: Colors.indigo,
               ),
               const SizedBox(height: 10),
               StatsCard(
-                title: 'Scholarship students',
+                title: 'Sinh viên học bổng',
                 value: provider.scholarshipStudents.toString(),
                 icon: Icons.emoji_events,
                 color: Colors.green,
               ),
               const SizedBox(height: 10),
               StatsCard(
-                title: 'Warning students',
+                title: 'Sinh viên cảnh báo',
                 value: provider.warningStudents.toString(),
                 icon: Icons.warning_amber,
                 color: Colors.orange,
@@ -324,7 +412,7 @@ class _StatsSection extends StatelessWidget {
           children: <Widget>[
             Expanded(
               child: StatsCard(
-                title: 'Total students',
+                title: 'Tổng sinh viên',
                 value: provider.totalStudents.toString(),
                 icon: Icons.groups,
                 color: Colors.indigo,
@@ -333,7 +421,7 @@ class _StatsSection extends StatelessWidget {
             const SizedBox(width: 10),
             Expanded(
               child: StatsCard(
-                title: 'Scholarship students',
+                title: 'Sinh viên học bổng',
                 value: provider.scholarshipStudents.toString(),
                 icon: Icons.emoji_events,
                 color: Colors.green,
@@ -342,7 +430,7 @@ class _StatsSection extends StatelessWidget {
             const SizedBox(width: 10),
             Expanded(
               child: StatsCard(
-                title: 'Warning students',
+                title: 'Sinh viên cảnh báo',
                 value: provider.warningStudents.toString(),
                 icon: Icons.warning_amber,
                 color: Colors.orange,
@@ -370,8 +458,10 @@ class _FilterDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isFacultyFilter = title == 'Khoa';
+
     return DropdownButtonFormField<String>(
-      initialValue: value ?? 'All',
+      initialValue: value ?? AppConstants.filterAll,
       decoration: InputDecoration(
         labelText: title,
         isDense: true,
@@ -379,8 +469,12 @@ class _FilterDropdown extends StatelessWidget {
       ),
       items: items
           .map(
-            (String item) =>
-                DropdownMenuItem<String>(value: item, child: Text(item)),
+            (String item) => DropdownMenuItem<String>(
+              value: item,
+              child: Text(
+                isFacultyFilter ? AppConstants.facultyLabel(item) : item,
+              ),
+            ),
           )
           .toList(),
       onChanged: onChanged,

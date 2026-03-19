@@ -50,7 +50,7 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(subject == null ? 'Add Subject' : 'Edit Subject'),
+          title: Text(subject == null ? 'Thêm môn học' : 'Sửa môn học'),
           content: SizedBox(
             width: 420,
             child: Form(
@@ -61,24 +61,24 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> {
                   TextFormField(
                     controller: nameController,
                     decoration: const InputDecoration(
-                      labelText: 'Subject name',
+                      labelText: 'Tên môn học',
                       border: OutlineInputBorder(),
                     ),
                     validator: (String? value) =>
-                        Validators.requiredField(value, 'Subject name'),
+                        Validators.requiredField(value, 'Tên môn học'),
                   ),
                   const SizedBox(height: 12),
                   TextFormField(
                     controller: creditsController,
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(
-                      labelText: 'Credits',
+                      labelText: 'Số tín chỉ',
                       border: OutlineInputBorder(),
                     ),
                     validator: (String? value) {
                       final String? required = Validators.requiredField(
                         value,
-                        'Credits',
+                        'Số tín chỉ',
                       );
                       if (required != null) {
                         return required;
@@ -86,7 +86,7 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> {
 
                       final int? credits = int.tryParse(value!);
                       if (credits == null || credits <= 0) {
-                        return 'Credits must be a positive integer';
+                        return 'Số tín chỉ phải là số nguyên dương';
                       }
 
                       return null;
@@ -99,21 +99,21 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> {
                       decimal: true,
                     ),
                     decoration: const InputDecoration(
-                      labelText: 'Score (0 - 10)',
+                      labelText: 'Điểm (0 - 10)',
                       border: OutlineInputBorder(),
                     ),
                     validator: (String? value) =>
-                        Validators.score10(value, 'Score'),
+                        Validators.score10(value, 'Điểm'),
                   ),
                   const SizedBox(height: 12),
                   TextFormField(
                     controller: semesterController,
                     decoration: const InputDecoration(
-                      labelText: 'Semester (e.g. HK1, HK2)',
+                      labelText: 'Học kỳ (ví dụ: HK1, HK2)',
                       border: OutlineInputBorder(),
                     ),
                     validator: (String? value) =>
-                        Validators.requiredField(value, 'Semester'),
+                        Validators.requiredField(value, 'Học kỳ'),
                   ),
                 ],
               ),
@@ -122,7 +122,7 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> {
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel'),
+              child: const Text('Hủy'),
             ),
             FilledButton(
               onPressed: () {
@@ -131,7 +131,7 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> {
                 }
                 Navigator.of(context).pop(true);
               },
-              child: const Text('Save'),
+              child: const Text('Lưu'),
             ),
           ],
         );
@@ -165,7 +165,7 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(error ?? 'Subject saved successfully.'),
+        content: Text(error ?? 'Đã lưu môn học thành công.'),
         backgroundColor: error == null ? Colors.green : Colors.red,
       ),
     );
@@ -184,19 +184,19 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Delete subject'),
-          content: Text('Delete ${subject.name}?'),
+          title: const Text('Xóa môn học'),
+          content: Text('Bạn có chắc muốn xóa ${subject.name}?'),
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel'),
+              child: const Text('Hủy'),
             ),
             FilledButton(
               onPressed: () => Navigator.of(context).pop(true),
               style: FilledButton.styleFrom(
                 backgroundColor: Colors.red.shade700,
               ),
-              child: const Text('Delete'),
+              child: const Text('Xóa'),
             ),
           ],
         );
@@ -218,7 +218,7 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(error ?? 'Subject deleted successfully.'),
+        content: Text(error ?? 'Đã xóa môn học thành công.'),
         backgroundColor: error == null ? Colors.green : Colors.red,
       ),
     );
@@ -234,7 +234,7 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> {
         appBar: AppBar(title: const Text(AppConstants.appTitle)),
         body: const Center(
           child: Text(
-            'No student selected. Return to dashboard and choose one.',
+            'Chưa chọn sinh viên nào. Hãy quay lại dashboard để chọn.',
           ),
         ),
       );
@@ -249,14 +249,14 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> {
               Navigator.of(context).pushNamed(StudentUpsertScreen.routeName);
             },
             icon: const Icon(Icons.edit_outlined),
-            tooltip: 'Edit student',
+            tooltip: 'Chỉnh sửa sinh viên',
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showSubjectDialog(studentId: selectedStudent.id),
         icon: const Icon(Icons.add),
-        label: const Text('Add Subject'),
+        label: const Text('Thêm môn học'),
       ),
       body: StreamBuilder<List<SubjectModel>>(
         stream: context.read<StudentProvider>().streamSubjectsByStudentId(
@@ -265,7 +265,9 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> {
         builder:
             (BuildContext context, AsyncSnapshot<List<SubjectModel>> snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const LoadingState(message: 'Loading profile...');
+                return const LoadingState(
+                  message: 'Đang tải hồ sơ sinh viên...',
+                );
               }
 
               if (snapshot.hasError) {
@@ -317,11 +319,11 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> {
                               color: Colors.teal,
                             ),
                             _InfoChip(
-                              label: 'Academic',
+                              label: 'Học lực',
                               value: academicLevel,
-                              color: academicLevel == 'Excellent'
+                              color: academicLevel == 'Xuất sắc'
                                   ? Colors.blue
-                                  : academicLevel == 'Good'
+                                  : academicLevel == 'Khá'
                                   ? Colors.green
                                   : Colors.orange,
                             ),
@@ -329,7 +331,7 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> {
                         ),
                         const SizedBox(height: 18),
                         Text(
-                          'Subjects',
+                          'Môn học',
                           style: Theme.of(context).textTheme.titleLarge
                               ?.copyWith(fontWeight: FontWeight.w700),
                         ),
@@ -343,7 +345,7 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: const Text(
-                              'No subjects yet. Add one to calculate GPA.',
+                              'Chưa có môn học. Hãy thêm môn để tính GPA.',
                             ),
                           )
                         else
@@ -361,7 +363,7 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> {
                                   ),
                                 ),
                                 subtitle: Text(
-                                  'Credits: ${subject.credits} | Score: ${subject.score.toStringAsFixed(2)} | ${subject.semester}',
+                                  'Tín chỉ: ${subject.credits} | Điểm: ${subject.score.toStringAsFixed(2)} | ${subject.semester}',
                                 ),
                                 trailing: Wrap(
                                   spacing: 4,
@@ -388,7 +390,7 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> {
                           ),
                         const SizedBox(height: 18),
                         Text(
-                          'Semester Score Comparison',
+                          'So sánh điểm theo học kỳ',
                           style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(fontWeight: FontWeight.w700),
                         ),
@@ -401,12 +403,14 @@ class _StudentDetailScreenState extends State<StudentDetailScreen> {
                           ),
                           padding: const EdgeInsets.fromLTRB(12, 18, 12, 12),
                           child: semesterAverages.isEmpty
-                              ? const Center(child: Text('No data for chart'))
+                              ? const Center(
+                                  child: Text('Không có dữ liệu biểu đồ'),
+                                )
                               : _SemesterBarChart(data: semesterAverages),
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'Grade Distribution',
+                          'Phân bố điểm',
                           style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(fontWeight: FontWeight.w700),
                         ),
@@ -476,7 +480,7 @@ class _ProfileCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text('MSSV: ${student.mssv}'),
-                    Text('Class: ${student.className}'),
+                    Text('Lớp: ${student.className}'),
                   ],
                 ),
               ),
@@ -488,10 +492,10 @@ class _ProfileCard extends StatelessWidget {
             runSpacing: 8,
             children: <Widget>[
               Text('Email: ${student.email}'),
-              Text('Phone: ${student.phone}'),
-              Text('Faculty: ${student.faculty}'),
-              Text('Course: ${student.course}'),
-              Text('Birth date: $birthDateText'),
+              Text('Số điện thoại: ${student.phone}'),
+              Text('Khoa: ${AppConstants.facultyLabel(student.faculty)}'),
+              Text('Khóa: ${student.course}'),
+              Text('Ngày sinh: $birthDateText'),
             ],
           ),
         ],
@@ -623,7 +627,7 @@ class _GradePieChart extends StatelessWidget {
       (int sum, int value) => sum + value,
     );
     if (total == 0) {
-      return const Center(child: Text('No grade data'));
+      return const Center(child: Text('Chưa có dữ liệu điểm'));
     }
 
     final Map<String, Color> colors = <String, Color>{

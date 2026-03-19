@@ -25,7 +25,7 @@ class AnalyticsScreen extends StatelessWidget {
         builder:
             (BuildContext context, AsyncSnapshot<List<StudentModel>> snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const LoadingState(message: 'Loading analytics...');
+                return const LoadingState(message: 'Đang tải thống kê...');
               }
 
               if (snapshot.hasError) {
@@ -55,7 +55,7 @@ class AnalyticsScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            'Analytics & Advanced Filters',
+                            'Thống kê và bộ lọc nâng cao',
                             style: Theme.of(context).textTheme.headlineSmall
                                 ?.copyWith(fontWeight: FontWeight.w700),
                           ),
@@ -67,19 +67,19 @@ class AnalyticsScreen extends StatelessWidget {
                             runSpacing: 10,
                             children: <Widget>[
                               _MetricCard(
-                                title: 'Filtered students',
+                                title: 'Sinh viên sau lọc',
                                 value: filteredStudents.length.toString(),
                                 color: Colors.indigo,
                                 icon: Icons.filter_alt_outlined,
                               ),
                               _MetricCard(
-                                title: 'Birthdays this month',
+                                title: 'Sinh nhật tháng này',
                                 value: birthdays.length.toString(),
                                 color: Colors.pink,
                                 icon: Icons.cake_outlined,
                               ),
                               _MetricCard(
-                                title: 'Unpaid tuition',
+                                title: 'Nợ học phí',
                                 value: unpaidTuition.length.toString(),
                                 color: Colors.deepOrange,
                                 icon: Icons.payments_outlined,
@@ -90,18 +90,18 @@ class AnalyticsScreen extends StatelessWidget {
                           _AcademicDistributionCard(data: academicDistribution),
                           const SizedBox(height: 12),
                           _NotificationSection(
-                            title: 'Students with birthday in current month',
+                            title: 'Sinh viên có sinh nhật trong tháng',
                             icon: Icons.cake_outlined,
                             students: birthdays,
                             emptyMessage:
-                                'No birthday notifications this month.',
+                                'Không có thông báo sinh nhật tháng này.',
                           ),
                           const SizedBox(height: 12),
                           _NotificationSection(
-                            title: 'Students with unpaid tuition (mock)',
+                            title: 'Sinh viên nợ học phí (mô phỏng)',
                             icon: Icons.warning_amber_outlined,
                             students: unpaidTuition,
-                            emptyMessage: 'No unpaid tuition notifications.',
+                            emptyMessage: 'Không có thông báo nợ học phí.',
                           ),
                           const SizedBox(height: 12),
                           _FilteredStudentList(students: filteredStudents),
@@ -136,40 +136,46 @@ class _FilterPanel extends StatelessWidget {
             children: <Widget>[
               Expanded(
                 child: DropdownButtonFormField<String>(
-                  initialValue: provider.facultyFilter ?? 'All',
+                  initialValue:
+                      provider.facultyFilter ?? AppConstants.filterAll,
                   decoration: const InputDecoration(
-                    labelText: 'Faculty',
+                    labelText: 'Khoa',
                     border: OutlineInputBorder(),
                     isDense: true,
                   ),
-                  items: <String>['All', ...AppConstants.faculties]
-                      .map(
-                        (String value) => DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        ),
-                      )
-                      .toList(),
+                  items:
+                      <String>[
+                            AppConstants.filterAll,
+                            ...AppConstants.faculties,
+                          ]
+                          .map(
+                            (String value) => DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(AppConstants.facultyLabel(value)),
+                            ),
+                          )
+                          .toList(),
                   onChanged: provider.setFacultyFilter,
                 ),
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: DropdownButtonFormField<String>(
-                  initialValue: provider.courseFilter ?? 'All',
+                  initialValue: provider.courseFilter ?? AppConstants.filterAll,
                   decoration: const InputDecoration(
-                    labelText: 'Course',
+                    labelText: 'Khóa',
                     border: OutlineInputBorder(),
                     isDense: true,
                   ),
-                  items: <String>['All', ...AppConstants.courses]
-                      .map(
-                        (String value) => DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        ),
-                      )
-                      .toList(),
+                  items:
+                      <String>[AppConstants.filterAll, ...AppConstants.courses]
+                          .map(
+                            (String value) => DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
+                            ),
+                          )
+                          .toList(),
                   onChanged: provider.setCourseFilter,
                 ),
               ),
@@ -182,7 +188,7 @@ class _FilterPanel extends StatelessWidget {
                 child: DropdownButtonFormField<String>(
                   initialValue: provider.academicFilter,
                   decoration: const InputDecoration(
-                    labelText: 'Academic level',
+                    labelText: 'Học lực',
                     border: OutlineInputBorder(),
                     isDense: true,
                   ),
@@ -207,7 +213,7 @@ class _FilterPanel extends StatelessWidget {
                 child: OutlinedButton.icon(
                   onPressed: provider.clearFilters,
                   icon: const Icon(Icons.filter_alt_off),
-                  label: const Text('Clear Filters'),
+                  label: const Text('Xóa bộ lọc'),
                 ),
               ),
             ],
@@ -288,7 +294,7 @@ class _AcademicDistributionCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            'Academic distribution',
+            'Phân bố học lực',
             style: Theme.of(
               context,
             ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
@@ -302,9 +308,9 @@ class _AcademicDistributionCard extends StatelessWidget {
                   (MapEntry<String, int> entry) => Chip(
                     label: Text('${entry.key}: ${entry.value}'),
                     avatar: CircleAvatar(
-                      backgroundColor: entry.key == 'Excellent'
+                      backgroundColor: entry.key == 'Xuất sắc'
                           ? Colors.blue
-                          : entry.key == 'Good'
+                          : entry.key == 'Khá'
                           ? Colors.green
                           : Colors.orange,
                     ),
@@ -394,14 +400,14 @@ class _FilteredStudentList extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            'Filtered students preview',
+            'Xem trước sinh viên sau lọc',
             style: Theme.of(
               context,
             ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 8),
           if (students.isEmpty)
-            const Text('No students matched current filters.')
+            const Text('Không có sinh viên nào khớp bộ lọc hiện tại.')
           else
             ...students
                 .take(10)
@@ -411,7 +417,7 @@ class _FilteredStudentList extends StatelessWidget {
                     contentPadding: EdgeInsets.zero,
                     title: Text(student.name),
                     subtitle: Text(
-                      '${student.mssv} - ${student.faculty} - ${student.course}',
+                      '${student.mssv} - ${AppConstants.facultyLabel(student.faculty)} - ${student.course}',
                     ),
                     trailing: Text(student.gpa4.toStringAsFixed(2)),
                   ),

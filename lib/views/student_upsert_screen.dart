@@ -129,7 +129,7 @@ class _StudentUpsertScreenState extends State<StudentUpsertScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(error ?? 'Student saved successfully.'),
+        content: Text(error ?? 'Đã lưu sinh viên thành công.'),
         backgroundColor: error == null ? Colors.green : Colors.red,
       ),
     );
@@ -168,7 +168,7 @@ class _StudentUpsertScreenState extends State<StudentUpsertScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(
-                          isEditMode ? 'Edit Student' : 'Add Student',
+                          isEditMode ? 'Chỉnh sửa sinh viên' : 'Thêm sinh viên',
                           style: Theme.of(context).textTheme.headlineSmall
                               ?.copyWith(fontWeight: FontWeight.w700),
                         ),
@@ -176,11 +176,11 @@ class _StudentUpsertScreenState extends State<StudentUpsertScreen> {
                         TextFormField(
                           controller: _nameController,
                           decoration: const InputDecoration(
-                            labelText: 'Full name',
+                            labelText: 'Họ và tên',
                             border: OutlineInputBorder(),
                           ),
                           validator: (String? value) =>
-                              Validators.requiredField(value, 'Name'),
+                              Validators.requiredField(value, 'Họ và tên'),
                         ),
                         const SizedBox(height: 12),
                         TextFormField(
@@ -206,21 +206,21 @@ class _StudentUpsertScreenState extends State<StudentUpsertScreen> {
                           controller: _phoneController,
                           keyboardType: TextInputType.phone,
                           decoration: const InputDecoration(
-                            labelText: 'Phone',
+                            labelText: 'Số điện thoại',
                             border: OutlineInputBorder(),
                           ),
                           validator: (String? value) =>
-                              Validators.requiredField(value, 'Phone'),
+                              Validators.requiredField(value, 'Số điện thoại'),
                         ),
                         const SizedBox(height: 12),
                         TextFormField(
                           controller: _classController,
                           decoration: const InputDecoration(
-                            labelText: 'Class',
+                            labelText: 'Lớp',
                             border: OutlineInputBorder(),
                           ),
                           validator: (String? value) =>
-                              Validators.requiredField(value, 'Class'),
+                              Validators.requiredField(value, 'Lớp'),
                         ),
                         const SizedBox(height: 12),
                         TextFormField(
@@ -229,24 +229,26 @@ class _StudentUpsertScreenState extends State<StudentUpsertScreen> {
                             decimal: true,
                           ),
                           decoration: const InputDecoration(
-                            labelText: 'GPA (scale 10)',
+                            labelText: 'GPA (thang 10)',
                             border: OutlineInputBorder(),
                           ),
                           validator: (String? value) =>
-                              Validators.score10(value, 'GPA (scale 10)'),
+                              Validators.score10(value, 'GPA (thang 10)'),
                         ),
                         const SizedBox(height: 12),
                         DropdownButtonFormField<String>(
                           initialValue: _faculty,
                           decoration: const InputDecoration(
-                            labelText: 'Faculty',
+                            labelText: 'Khoa',
                             border: OutlineInputBorder(),
                           ),
                           items: AppConstants.faculties
                               .map(
                                 (String faculty) => DropdownMenuItem<String>(
                                   value: faculty,
-                                  child: Text(faculty),
+                                  child: Text(
+                                    AppConstants.facultyLabel(faculty),
+                                  ),
                                 ),
                               )
                               .toList(),
@@ -263,7 +265,7 @@ class _StudentUpsertScreenState extends State<StudentUpsertScreen> {
                         DropdownButtonFormField<String>(
                           initialValue: _course,
                           decoration: const InputDecoration(
-                            labelText: 'Course',
+                            labelText: 'Khóa',
                             border: OutlineInputBorder(),
                           ),
                           items: AppConstants.courses
@@ -287,14 +289,14 @@ class _StudentUpsertScreenState extends State<StudentUpsertScreen> {
                         DropdownButtonFormField<String>(
                           initialValue: _gender,
                           decoration: const InputDecoration(
-                            labelText: 'Gender',
+                            labelText: 'Giới tính',
                             border: OutlineInputBorder(),
                           ),
                           items: AppConstants.genders
                               .map(
                                 (String gender) => DropdownMenuItem<String>(
                                   value: gender,
-                                  child: Text(gender.toUpperCase()),
+                                  child: Text(AppConstants.genderLabel(gender)),
                                 ),
                               )
                               .toList(),
@@ -313,7 +315,7 @@ class _StudentUpsertScreenState extends State<StudentUpsertScreen> {
                           borderRadius: BorderRadius.circular(10),
                           child: InputDecorator(
                             decoration: const InputDecoration(
-                              labelText: 'Birth date',
+                              labelText: 'Ngày sinh',
                               border: OutlineInputBorder(),
                               suffixIcon: Icon(Icons.calendar_month),
                             ),
@@ -323,7 +325,7 @@ class _StudentUpsertScreenState extends State<StudentUpsertScreen> {
                         const SizedBox(height: 8),
                         SwitchListTile.adaptive(
                           contentPadding: EdgeInsets.zero,
-                          title: const Text('Unpaid tuition (mock)'),
+                          title: const Text('Nợ học phí (mô phỏng)'),
                           value: _hasUnpaidTuition,
                           onChanged: (bool value) {
                             setState(() {
@@ -347,8 +349,8 @@ class _StudentUpsertScreenState extends State<StudentUpsertScreen> {
                                   )
                                 : Text(
                                     isEditMode
-                                        ? 'Update Student'
-                                        : 'Create Student',
+                                        ? 'Cập nhật sinh viên'
+                                        : 'Tạo sinh viên',
                                   ),
                           ),
                         ),

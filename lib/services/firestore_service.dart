@@ -27,7 +27,7 @@ class FirestoreService {
       });
     } catch (error) {
       return Stream<List<StudentModel>>.error(
-        Exception('Failed to stream students: $error'),
+        Exception('Không thể tải danh sách sinh viên: $error'),
       );
     }
   }
@@ -45,7 +45,7 @@ class FirestoreService {
       data['id'] ??= snapshot.id;
       return StudentModel.fromMap(data);
     } catch (error) {
-      throw Exception('Failed to get student: $error');
+      throw Exception('Không thể lấy thông tin sinh viên: $error');
     }
   }
 
@@ -60,7 +60,7 @@ class FirestoreService {
             SetOptions(merge: true),
           );
     } catch (error) {
-      throw Exception('Failed to save student: $error');
+      throw Exception('Không thể lưu sinh viên: $error');
     }
   }
 
@@ -80,7 +80,7 @@ class FirestoreService {
       batch.delete(_studentsRef.doc(studentId));
       await batch.commit();
     } catch (error) {
-      throw Exception('Failed to delete student: $error');
+      throw Exception('Không thể xóa sinh viên: $error');
     }
   }
 
@@ -105,7 +105,7 @@ class FirestoreService {
 
       return false;
     } catch (error) {
-      throw Exception('Failed to validate MSSV: $error');
+      throw Exception('Không thể kiểm tra MSSV: $error');
     }
   }
 
@@ -127,7 +127,7 @@ class FirestoreService {
           });
     } catch (error) {
       return Stream<List<SubjectModel>>.error(
-        Exception('Failed to stream subjects: $error'),
+        Exception('Không thể tải danh sách môn học: $error'),
       );
     }
   }
@@ -148,7 +148,7 @@ class FirestoreService {
         return SubjectModel.fromMap(data);
       }).toList();
     } catch (error) {
-      throw Exception('Failed to get subjects: $error');
+      throw Exception('Không thể lấy danh sách môn học: $error');
     }
   }
 
@@ -163,7 +163,7 @@ class FirestoreService {
           .doc(subject.id)
           .set(subject.toMap(), SetOptions(merge: true));
     } catch (error) {
-      throw Exception('Failed to save subject: $error');
+      throw Exception('Không thể lưu môn học: $error');
     }
   }
 
@@ -178,7 +178,7 @@ class FirestoreService {
           .doc(subjectId)
           .delete();
     } catch (error) {
-      throw Exception('Failed to delete subject: $error');
+      throw Exception('Không thể xóa môn học: $error');
     }
   }
 
@@ -194,7 +194,7 @@ class FirestoreService {
         'updatedAt': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
     } catch (error) {
-      throw Exception('Failed to update GPA: $error');
+      throw Exception('Không thể cập nhật GPA: $error');
     }
   }
 }

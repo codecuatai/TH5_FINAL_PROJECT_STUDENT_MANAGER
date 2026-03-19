@@ -35,7 +35,7 @@ class StudentCard extends StatelessWidget {
               backgroundColor: Colors.teal,
               foregroundColor: Colors.white,
               icon: Icons.call,
-              label: 'Call',
+              label: 'Gọi',
               borderRadius: BorderRadius.circular(12),
             ),
           ],
@@ -48,7 +48,7 @@ class StudentCard extends StatelessWidget {
               backgroundColor: Colors.red.shade600,
               foregroundColor: Colors.white,
               icon: Icons.delete,
-              label: 'Delete',
+              label: 'Xóa',
               borderRadius: BorderRadius.circular(12),
             ),
           ],
@@ -83,7 +83,7 @@ class StudentCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text('MSSV: ${student.mssv}'),
-                  Text('Class: ${student.className}'),
+                  Text('Lớp: ${student.className}'),
                 ],
               ),
             ),
@@ -119,10 +119,10 @@ class StudentCard extends StatelessWidget {
   }
 
   Color _badgeColor(String level) {
-    if (level == 'Excellent') {
+    if (level == 'Xuất sắc') {
       return Colors.blue;
     }
-    if (level == 'Good') {
+    if (level == 'Khá') {
       return Colors.green;
     }
     return Colors.orange;

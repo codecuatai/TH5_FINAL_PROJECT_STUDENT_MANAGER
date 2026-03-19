@@ -52,12 +52,12 @@ class GpaUtils {
 
   static String academicLevelFromGpa4(double gpa4) {
     if (gpa4 >= 3.6) {
-      return 'Excellent';
+      return 'Xuất sắc';
     }
     if (gpa4 >= 2.5) {
-      return 'Good';
+      return 'Khá';
     }
-    return 'Average';
+    return 'Trung bình';
   }
 
   static Map<String, int> gradeDistribution(List<SubjectModel> subjects) {
@@ -108,9 +108,9 @@ class GpaUtils {
 
   static Map<String, int> academicDistribution(List<StudentModel> students) {
     final Map<String, int> result = <String, int>{
-      'Excellent': 0,
-      'Good': 0,
-      'Average': 0,
+      'Xuất sắc': 0,
+      'Khá': 0,
+      'Trung bình': 0,
     };
 
     for (final StudentModel student in students) {

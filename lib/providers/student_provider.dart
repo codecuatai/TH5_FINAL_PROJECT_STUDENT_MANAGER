@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../models/student_model.dart';
 import '../models/subject_model.dart';
 import '../services/firestore_service.dart';
+import '../utils/app_constants.dart';
 import '../utils/gpa_utils.dart';
 
 class StudentProvider extends ChangeNotifier {
@@ -16,7 +17,7 @@ class StudentProvider extends ChangeNotifier {
   String _searchQuery = '';
   String? _facultyFilter;
   String? _courseFilter;
-  String _academicFilter = 'All';
+  String _academicFilter = AppConstants.filterAll;
 
   String? _selectedStudentId;
   bool _isSaving = false;
@@ -61,12 +62,16 @@ class StudentProvider extends ChangeNotifier {
   }
 
   void setFacultyFilter(String? faculty) {
-    _facultyFilter = (faculty == null || faculty == 'All') ? null : faculty;
+    _facultyFilter = (faculty == null || faculty == AppConstants.filterAll)
+        ? null
+        : faculty;
     notifyListeners();
   }
 
   void setCourseFilter(String? course) {
-    _courseFilter = (course == null || course == 'All') ? null : course;
+    _courseFilter = (course == null || course == AppConstants.filterAll)
+        ? null
+        : course;
     notifyListeners();
   }
 
@@ -78,7 +83,7 @@ class StudentProvider extends ChangeNotifier {
   void clearFilters() {
     _facultyFilter = null;
     _courseFilter = null;
-    _academicFilter = 'All';
+    _academicFilter = AppConstants.filterAll;
     _searchQuery = '';
     notifyListeners();
   }
@@ -109,7 +114,8 @@ class StudentProvider extends ChangeNotifier {
         student.gpa4,
       );
       final bool matchesAcademic =
-          _academicFilter == 'All' || studentAcademicLevel == _academicFilter;
+          _academicFilter == AppConstants.filterAll ||
+          studentAcademicLevel == _academicFilter;
 
       return matchesSearch &&
           matchesFaculty &&
@@ -155,7 +161,7 @@ class StudentProvider extends ChangeNotifier {
       );
 
       if (!isUnique) {
-        _errorMessage = 'MSSV already exists in the system.';
+        _errorMessage = 'MSSV đã tồn tại trong hệ thống.';
         return _errorMessage;
       }
 
@@ -197,7 +203,7 @@ class StudentProvider extends ChangeNotifier {
   }) async {
     final String? resolvedStudentId = studentId ?? _selectedStudentId;
     if (resolvedStudentId == null) {
-      return 'No student selected.';
+      return 'Chưa chọn sinh viên nào.';
     }
 
     _isSaving = true;
@@ -233,7 +239,7 @@ class StudentProvider extends ChangeNotifier {
   }) async {
     final String? resolvedStudentId = studentId ?? _selectedStudentId;
     if (resolvedStudentId == null) {
-      return 'No student selected.';
+      return 'Chưa chọn sinh viên nào.';
     }
 
     _isSaving = true;

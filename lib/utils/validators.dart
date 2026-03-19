@@ -3,21 +3,21 @@ class Validators {
 
   static String? requiredField(String? value, String label) {
     if (value == null || value.trim().isEmpty) {
-      return '$label is required';
+      return '$label không được để trống';
     }
     return null;
   }
 
   static String? adminEmail(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return 'Email is required';
+      return 'Email không được để trống';
     }
 
     final RegExp emailRegex = RegExp(
       r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$',
     );
     if (!emailRegex.hasMatch(value.trim())) {
-      return 'Invalid email format';
+      return 'Định dạng email không hợp lệ';
     }
 
     return null;
@@ -31,7 +31,7 @@ class Validators {
 
     final String email = value!.trim().toLowerCase();
     if (!email.endsWith('@gmail.com') && !email.endsWith('@wru.vn')) {
-      return 'Email must end with @gmail.com or @wru.vn';
+      return 'Email phải kết thúc bằng @gmail.com hoặc @wru.vn';
     }
 
     return null;
@@ -39,10 +39,10 @@ class Validators {
 
   static String? password(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Password is required';
+      return 'Mật khẩu không được để trống';
     }
     if (value.length < 6) {
-      return 'Password must be at least 6 characters';
+      return 'Mật khẩu phải có ít nhất 6 ký tự';
     }
     return null;
   }
@@ -55,7 +55,7 @@ class Validators {
 
     final String mssv = value!.trim();
     if (mssv.length < 6) {
-      return 'MSSV must be at least 6 characters';
+      return 'MSSV phải có ít nhất 6 ký tự';
     }
 
     return null;
@@ -69,10 +69,10 @@ class Validators {
 
     final double? score = double.tryParse(value!);
     if (score == null) {
-      return '$label must be a number';
+      return '$label phải là số';
     }
     if (score < 0 || score > 10) {
-      return '$label must be between 0 and 10';
+      return '$label phải nằm trong khoảng từ 0 đến 10';
     }
     return null;
   }

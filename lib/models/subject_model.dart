@@ -35,7 +35,7 @@ class SubjectModel {
       name: (map['name'] as String?) ?? '',
       credits: (map['credits'] as num?)?.toInt() ?? 0,
       score: (map['score'] as num?)?.toDouble() ?? 0,
-      semester: (map['semester'] as String?) ?? 'N/A',
+      semester: (map['semester'] as String?) ?? 'Chưa rõ',
     );
   }
 

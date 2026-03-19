@@ -22,7 +22,7 @@ Future<void> main() async {
     );
   } catch (error) {
     try {
-      // Fallback for environments where generated options are unavailable.
+      // Dự phòng cho môi trường chưa có cấu hình Firebase được sinh tự động.
       await Firebase.initializeApp();
     } catch (fallbackError) {
       initError = fallbackError.toString();
@@ -109,7 +109,7 @@ class _InitErrorScreen extends StatelessWidget {
               Icon(Icons.error_outline, size: 40, color: Colors.red.shade700),
               const SizedBox(height: 12),
               const Text(
-                'Firebase initialization failed.',
+                'Khởi tạo Firebase thất bại.',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
