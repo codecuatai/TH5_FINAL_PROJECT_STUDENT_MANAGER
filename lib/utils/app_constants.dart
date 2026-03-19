@@ -1,7 +1,7 @@
 class AppConstants {
   const AppConstants._();
 
-  static const String appTitle = 'SM - Quản lý sinh viên';
+  static const String appTitle = 'SM - Nhóm 6';
   static const String filterAll = 'Tất cả';
 
   static const List<String> faculties = <String>[
