@@ -98,7 +98,7 @@ class AnalyticsScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 12),
                           _NotificationSection(
-                            title: 'Sinh viên nợ học phí (mô phỏng)',
+                            title: 'Sinh viên nợ học phí',
                             icon: Icons.warning_amber_outlined,
                             students: unpaidTuition,
                             emptyMessage: 'Không có thông báo nợ học phí.',

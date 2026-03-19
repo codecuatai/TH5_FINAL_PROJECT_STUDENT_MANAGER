@@ -325,7 +325,7 @@ class _StudentUpsertScreenState extends State<StudentUpsertScreen> {
                         const SizedBox(height: 8),
                         SwitchListTile.adaptive(
                           contentPadding: EdgeInsets.zero,
-                          title: const Text('Nợ học phí (mô phỏng)'),
+                          title: const Text('Nợ học phí'),
                           value: _hasUnpaidTuition,
                           onChanged: (bool value) {
                             setState(() {
