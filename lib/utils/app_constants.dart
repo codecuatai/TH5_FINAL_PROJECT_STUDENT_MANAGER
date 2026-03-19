@@ -1,7 +1,7 @@
 class AppConstants {
   const AppConstants._();
 
-  static const String appTitle = 'SM - Nhóm [Số nhóm]';
+  static const String appTitle = 'SM - Nhóm 6';
 
   static const List<String> faculties = <String>[
     'CNTT',

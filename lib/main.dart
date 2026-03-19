@@ -9,6 +9,7 @@ import 'utils/app_constants.dart';
 import 'views/analytics_screen.dart';
 import 'views/dashboard_screen.dart';
 import 'views/login_screen.dart';
+import 'views/register_screen.dart';
 import 'views/student_detail_screen.dart';
 import 'views/student_upsert_screen.dart';
 
@@ -59,6 +60,7 @@ class SMApp extends StatelessWidget {
         ),
         routes: <String, WidgetBuilder>{
           LoginScreen.routeName: (_) => const LoginScreen(),
+          RegisterScreen.routeName: (_) => const RegisterScreen(),
           DashboardScreen.routeName: (_) => const DashboardScreen(),
           StudentUpsertScreen.routeName: (_) => const StudentUpsertScreen(),
           StudentDetailScreen.routeName: (_) => const StudentDetailScreen(),

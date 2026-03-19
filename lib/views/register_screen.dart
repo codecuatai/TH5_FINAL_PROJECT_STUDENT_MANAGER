@@ -5,62 +5,57 @@ import '../providers/auth_provider.dart';
 import '../utils/app_constants.dart';
 import '../utils/validators.dart';
 import 'dashboard_screen.dart';
-import 'register_screen.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
-
-  static const String routeName = '/login';
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
+  static const String routeName = '/register';
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-
+class _RegisterScreenState extends State<RegisterScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _emailCtrl = TextEditingController();
+  final _passwordCtrl = TextEditingController();
+  final _confirmCtrl = TextEditingController();
   bool _isPasswordVisible = false;
 
   @override
   void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
+    _emailCtrl.dispose();
+    _passwordCtrl.dispose();
+    _confirmCtrl.dispose();
     super.dispose();
   }
 
-  Future<void> _handleLogin() async {
-    if (!_formKey.currentState!.validate()) {
+  Future<void> _handleRegister() async {
+    if (!_formKey.currentState!.validate()) return;
+    if (_passwordCtrl.text != _confirmCtrl.text) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Passwords do not match')));
       return;
     }
 
-    final AuthProvider authProvider = context.read<AuthProvider>();
-    final bool success = await authProvider.login(
-      email: _emailController.text,
-      password: _passwordController.text,
+    final auth = context.read<AuthProvider>();
+    final success = await auth.register(
+      email: _emailCtrl.text,
+      password: _passwordCtrl.text,
     );
 
-    if (!mounted) {
-      return;
-    }
-
+    if (!mounted) return;
     if (success) {
       Navigator.of(context).pushReplacementNamed(DashboardScreen.routeName);
-      return;
+    } else {
+      final msg = auth.errorMessage ?? 'Registration failed.';
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
     }
-
-    final String errorMessage = authProvider.errorMessage ?? 'Login failed.';
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(errorMessage)));
   }
 
   @override
   Widget build(BuildContext context) {
-    final bool isLoading = context.select<AuthProvider, bool>(
-      (AuthProvider provider) => provider.isLoading,
-    );
+    final isLoading = context.select<AuthProvider, bool>((p) => p.isLoading);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF6FAFF),
@@ -84,28 +79,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
-                        Container(
-                          width: 86,
-                          height: 86,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF0F5FAF),
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                          child: const Icon(
-                            Icons.school,
-                            color: Colors.white,
-                            size: 44,
-                          ),
-                        ),
-                        const SizedBox(height: 18),
                         Text(
-                          'Admin Login',
+                          'Create Account',
                           style: Theme.of(context).textTheme.headlineSmall
                               ?.copyWith(fontWeight: FontWeight.w700),
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 18),
                         TextFormField(
-                          controller: _emailController,
+                          controller: _emailCtrl,
                           keyboardType: TextInputType.emailAddress,
                           textInputAction: TextInputAction.next,
                           decoration: const InputDecoration(
@@ -117,10 +98,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         const SizedBox(height: 14),
                         TextFormField(
-                          controller: _passwordController,
+                          controller: _passwordCtrl,
                           obscureText: !_isPasswordVisible,
-                          textInputAction: TextInputAction.done,
-                          onFieldSubmitted: (_) => _handleLogin(),
+                          textInputAction: TextInputAction.next,
                           decoration: InputDecoration(
                             labelText: 'Password',
                             border: const OutlineInputBorder(),
@@ -140,12 +120,22 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           validator: Validators.password,
                         ),
+                        const SizedBox(height: 14),
+                        TextFormField(
+                          controller: _confirmCtrl,
+                          obscureText: true,
+                          textInputAction: TextInputAction.done,
+                          decoration: const InputDecoration(
+                            labelText: 'Confirm Password',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
                         const SizedBox(height: 22),
                         SizedBox(
                           width: double.infinity,
                           height: 48,
                           child: FilledButton(
-                            onPressed: isLoading ? null : _handleLogin,
+                            onPressed: isLoading ? null : _handleRegister,
                             child: isLoading
                                 ? const SizedBox(
                                     width: 22,
@@ -154,17 +144,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       strokeWidth: 2,
                                     ),
                                   )
-                                : const Text('Login'),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            onPressed: () => Navigator.of(
-                              context,
-                            ).pushNamed(RegisterScreen.routeName),
-                            child: const Text(''),
+                                : const Text('Register'),
                           ),
                         ),
                       ],
